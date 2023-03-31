@@ -1,4 +1,4 @@
-package com.example.summarizednews.news.presentation.screen.list
+package com.example.summarizednews.news.presentation.list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

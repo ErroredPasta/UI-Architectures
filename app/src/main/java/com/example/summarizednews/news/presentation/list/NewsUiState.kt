@@ -1,4 +1,4 @@
-package com.example.summarizednews.news.presentation.screen.list
+package com.example.summarizednews.news.presentation.list
 
 data class NewsUiState(
     val id: String,

@@ -1,7 +1,6 @@
-package com.example.summarizednews.news.presentation.mapper
+package com.example.summarizednews.news.presentation.list
 
 import com.example.summarizednews.news.domain.model.News
-import com.example.summarizednews.news.presentation.screen.list.NewsUiState
 
 internal fun News.toNewsUiState(
     onClick: () -> Unit
