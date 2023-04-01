@@ -1,4 +1,4 @@
-package com.example.summarizednews.news.data.di
+package com.example.summarizednews.di.news
 
 import com.example.summarizednews.news.data.api.NewsApi
 import com.example.summarizednews.news.data.repository.NewsRepositoryImpl

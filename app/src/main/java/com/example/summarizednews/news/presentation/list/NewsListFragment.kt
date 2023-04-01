@@ -4,60 +4,54 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.map
-import androidx.recyclerview.widget.RecyclerView
+import com.example.summarizednews.R
 import com.example.summarizednews.core.presentation.repeatOnLifecycleWhenStarted
+import com.example.summarizednews.core.presentation.showToast
 import com.example.summarizednews.databinding.FragmentNewsListBinding
-import com.example.summarizednews.news.domain.repository.NewsRepository
+import com.example.summarizednews.news.domain.model.News
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class NewsListFragment : Fragment() {
+class NewsListFragment : Fragment(), NewsListView {
     private val adapter = NewsListAdapter()
     private val navController by lazy { findNavController() }
-    private var recyclerView: RecyclerView? = null
 
     @Inject
-    lateinit var repository: NewsRepository
+    lateinit var presenter: NewsListPresenter
+
+    private val binding get() = _binding!!
+    private var _binding: FragmentNewsListBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View = FragmentNewsListBinding.inflate(inflater, container, false).apply {
-        newsListRecyclerView.adapter = adapter
-        newsListRefreshLayout.setOnRefreshListener {
-            repository.reloadNewsList()
-            adapter.refresh()
-        }
-    }.also { binding ->
-        recyclerView = binding.newsListRecyclerView
-
-        viewLifecycleOwner.repeatOnLifecycleWhenStarted {
-            adapter.loadStateFlow.collectLatest { loadState ->
-                when (val currentState = loadState.refresh) {
-                    LoadState.Loading -> binding.onLoading()
-                    is LoadState.NotLoading -> binding.onSuccess()
-                    is LoadState.Error -> binding.onError(cause = currentState.error)
-                }
+    ): View {
+        _binding = FragmentNewsListBinding.inflate(inflater, container, false).apply {
+            newsListRecyclerView.adapter = adapter
+            newsListRefreshLayout.setOnRefreshListener {
+                presenter.reloadNewsList()
+                adapter.refresh()
             }
         }
+        presenter.fetchNewsList()
+        collectAdapterState()
 
-        viewLifecycleOwner.repeatOnLifecycleWhenStarted {
-            repository.getNewsList().collectLatest { pagingData ->
-                val newsUiState = pagingData.map { news ->
-                    news.toNewsUiState(onClick = { navigateToDetailScreen(newsId = news.id) })
-                }
+        return binding.root
+    }
 
-                adapter.submitData(newsUiState)
-            }
-        }
-    }.root
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.newsListRecyclerView.adapter = null
+        _binding = null
+    }
 
     private fun navigateToDetailScreen(newsId: String) {
         navController.navigate(NewsListFragmentDirections.actionNewsListFragmentToNewsDetailFragment(
@@ -65,9 +59,38 @@ class NewsListFragment : Fragment() {
         ))
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        recyclerView?.adapter = null
-        recyclerView = null
+    override suspend fun onPageLoaded(pageData: PagingData<News>) {
+        val newsUiState = pageData.map { news ->
+            news.toNewsUiState(onClick = { navigateToDetailScreen(newsId = news.id) })
+        }
+
+        adapter.submitData(newsUiState)
+    }
+
+    private fun showLoading(isLoading: Boolean) = with(binding) {
+        newsListRefreshLayout.isRefreshing = isLoading
+        newsListLoadingShimmer.run {
+            isVisible = isLoading
+            if (isLoading) startShimmer() else stopShimmer()
+        }
+        newsListRecyclerView.isVisible = !isLoading
+    }
+
+    private fun collectAdapterState() {
+        viewLifecycleOwner.repeatOnLifecycleWhenStarted {
+            adapter.loadStateFlow.collect {
+                when (val currentState = it.refresh) {
+                    LoadState.Loading -> showLoading(isLoading = true)
+                    is LoadState.NotLoading -> showLoading(isLoading = false)
+                    is LoadState.Error -> {
+                        showLoading(isLoading = false)
+                        showToast(
+                            message = currentState.error.message
+                                ?: getString(R.string.error_occurred_while_getting_news)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
