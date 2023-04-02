@@ -4,6 +4,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.example.summarizednews.news.presentation.detail.NewsDetailViewModel" />
 
         <import type="android.view.View" />
 
@@ -22,17 +25,17 @@
 
 
             <LinearLayout
-                android:id="@+id/news_detail_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp"
-                android:visibility="gone">
+                android:visibility="@{viewModel.newsDetail == null ? View.GONE : View.VISIBLE}">
 
                 <TextView
                     android:id="@+id/news_detail_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="@{viewModel.newsDetail.title}"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -44,6 +47,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:text="@{viewModel.newsDetail.section}"
                     android:textColor="@color/black"
                     android:textSize="@dimen/default_text_size"
                     tools:text="Media" />
@@ -54,19 +58,19 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:gravity="end"
+                    android:text="@{viewModel.newsDetail.writtenAt}"
                     android:textColor="@color/gray"
                     android:textSize="@dimen/default_text_size"
                     tools:text="2023-02-10T16:37:18Z" />
 
                 <androidx.appcompat.widget.LinearLayoutCompat
-                    android:id="@+id/news_summary_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/default_margin"
                     android:background="@color/purple_500"
                     android:orientation="vertical"
                     android:padding="10dp"
-                    android:visibility="gone">
+                    android:visibility="@{viewModel.newsSummary != null ? View.VISIBLE : View.GONE}">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -77,9 +81,9 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/news_summary_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:text="@{viewModel.newsSummary}"
                         android:textColor="@color/white"
                         tools:text="Summary content" />
 
@@ -90,6 +94,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
+                    android:text="@{Html.fromHtml(viewModel.newsDetail.body ?? ``)}"
                     android:textColor="@color/black"
                     android:textSize="@dimen/default_text_size"
                     tools:text="News body text" />
@@ -100,13 +105,12 @@
         </ScrollView>
 
         <ProgressBar
-            android:id="@+id/news_detail_progress_bar"
             style="@style/Widget.Material3.CircularProgressIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true"
-            android:visibility="visible" />
+            android:visibility="@{viewModel.newsDetail == null ? View.VISIBLE : View.GONE}" />
 
     </FrameLayout>
 
