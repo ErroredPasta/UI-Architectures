@@ -6,6 +6,6 @@ import javax.inject.Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class Dispatcher(val type: Type) {
     enum class Type {
-        MAIN, IO, DEFAULT, UNCONFINED
+        IO, DEFAULT, UNCONFINED
     }
 }
