@@ -18,9 +18,9 @@ private val emptyNewsDetail = NewsDetail(
 )
 
 sealed interface NewsDetailAction {
-    data class FetchNewsDetail(val id: String)
-    object FetchingStarted
-    data class FetchingSuccess(val newsDetail: NewsDetail)
-    data class SummarizingSuccess(val summary: String)
-    data class ErrorOccurred(val cause: Throwable)
+    data class FetchNewsDetail(val id: String) : NewsDetailAction
+    object FetchingStarted : NewsDetailAction
+    data class FetchingSuccess(val newsDetail: NewsDetail) : NewsDetailAction
+    data class SummarizingSuccess(val summary: String) : NewsDetailAction
+    data class ErrorOccurred(val cause: Throwable) : NewsDetailAction
 }
