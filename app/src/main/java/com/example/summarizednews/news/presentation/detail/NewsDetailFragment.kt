@@ -6,21 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import com.example.summarizednews.AppState
 import com.example.summarizednews.R
 import com.example.summarizednews.core.presentation.showToast
 import com.example.summarizednews.databinding.FragmentNewsDetailBinding
+import com.example.summarizednews.flux.Dispatcher
 import dagger.hilt.android.AndroidEntryPoint
-import org.reduxkotlin.Store
-import org.reduxkotlin.StoreSubscription
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class NewsDetailFragment : Fragment() {
     @Inject
-    lateinit var store: Store<AppState>
+    lateinit var store: NewsDetailStore
 
-    private lateinit var unsubscribe: StoreSubscription
     private val navArgs by navArgs<NewsDetailFragmentArgs>()
 
     override fun onCreateView(
@@ -28,8 +25,9 @@ class NewsDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View = FragmentNewsDetailBinding.inflate(inflater, container, false).also { binding ->
-        unsubscribe = store.subscribe {
-            val newsDetailState = store.state.newsDetailState
+        Dispatcher.subscribe(store)
+
+        store.onStateChange { newsDetailState ->
             binding.state = newsDetailState
 
             newsDetailState.error?.let {
@@ -37,11 +35,11 @@ class NewsDetailFragment : Fragment() {
             }
         }
 
-        store.dispatch(NewsDetailAction.FetchNewsDetail(id = navArgs.newsId))
+        Dispatcher.dispatch(action = NewsDetailAction.FetchNewsDetail(id = navArgs.newsId))
     }.root
 
     override fun onDestroyView() {
         super.onDestroyView()
-        unsubscribe()
+        Dispatcher.unsubscribe(store)
     }
 }

@@ -1,5 +1,6 @@
 package com.example.summarizednews.news.presentation.detail
 
+import com.example.summarizednews.flux.Action
 import com.example.summarizednews.news.domain.model.NewsDetail
 
 data class NewsDetailState(
@@ -17,10 +18,10 @@ private val emptyNewsDetail = NewsDetail(
     body = ""
 )
 
-sealed interface NewsDetailAction {
-    data class FetchNewsDetail(val id: String)
-    object FetchingStarted
-    data class FetchingSuccess(val newsDetail: NewsDetail)
-    data class SummarizingSuccess(val summary: String)
-    data class ErrorOccurred(val cause: Throwable)
+sealed interface NewsDetailAction : Action {
+    data class FetchNewsDetail(val id: String) : NewsDetailAction
+    object FetchingStarted : NewsDetailAction
+    data class FetchingSuccess(val newsDetail: NewsDetail) : NewsDetailAction
+    data class SummarizingSuccess(val summary: String) : NewsDetailAction
+    data class ErrorOccurred(val cause: Throwable) : NewsDetailAction
 }

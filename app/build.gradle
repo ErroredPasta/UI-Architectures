@@ -108,9 +108,6 @@ dependencies {
     // region Paging ===============================================================================
     implementation "androidx.paging:paging-runtime-ktx:3.1.1"
     // endregion Paging ============================================================================
-
-    implementation "org.reduxkotlin:redux-kotlin-threadsafe-jvm:0.6.0"
-    implementation "org.reduxkotlin:redux-kotlin-thunk:0.6.0"
 }
 
 kapt {
